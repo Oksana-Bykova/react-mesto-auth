@@ -1,0 +1,14 @@
+.form__container {
+  
+  margin: 0 auto;
+  font-family: 'Inter', 'Arial', 'Helvetica Neue', sans-serif;
+  font-style: normal;
+  max-width: 358px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  background: transparent;
+  border: 1px;
+}
+
