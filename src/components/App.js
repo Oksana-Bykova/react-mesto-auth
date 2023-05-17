@@ -2,7 +2,7 @@ import React from "react";
 
 import Header from "./Header.js";
 import Main from "./Main.js";
-import Footer from "./Footer.js";
+
 import { PopupWithForm } from "./PopupWithForm.js";
 import ImagePopup from "./ImagePopup.jsx";
 import { api } from "../utils/Api.js";
@@ -10,10 +10,12 @@ import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 import { EditProfilePopup } from "./EditProfilePopup.js";
 import { EditAvatarPopup } from "./EditAvatarPopup.js";
 import { AddPlacePopup } from "./AddPlacePopup.js";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Login from "./Login.js";
 import ProtectedRouteElement from "./ProtectedRoute.js";
 import { Register } from "./Regisret.js";
+import * as auth from '../utils/auth.js';
+import { InfoTooltip } from "./InfoTooltip.js";
 
 function App() {
   //стейт переменные для открытия попапов, когда в них попадает тру(при нажатии на кнопку открытия попапа в компоненте Main - состояние isOpen тоже менятся на тру и попапу присваивается класс popup_opened)
@@ -32,9 +34,14 @@ function App() {
 
   const [cards, setCards] = React.useState([]);
 
- 
+ const navigate = useNavigate();
+ const [succses, setSuccses] = React.useState(false);
+ const [isRegisterPopupOpen, setIsRegisterPopupOpen] = React.useState(false);
 
-  // 3 функцйии - обработчика для событий клика на кнопки -открытия попапов
+ //собираем емайл из логина
+ const [userEmail, setUserEmail] = React.useState({});
+
+  // 4 функцйии - обработчика для событий клика на кнопки -открытия попапов
   function handleEditProfileClick() {
     setIsEditProfilePopupOpen(!isEditProfilePopupOpen);
   }
@@ -46,12 +53,18 @@ function App() {
   function handleEditAvatarClick() {
     setIsEditAvatarPopupOpen(!isEditAvatarPopupOpen);
   }
+
+  function handleRegisterAvatar() {
+    setIsRegisterPopupOpen(!isRegisterPopupOpen);
+  }
+
   //обработчик клика по крестику в попапе
   function closeAllPopups() {
     setIsEditAvatarPopupOpen(false);
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
     setIsPhotoPopupOpen(false);
+    setIsRegisterPopupOpen(false);
   }
 
   React.useEffect(() => {
@@ -126,26 +139,53 @@ function App() {
 
    //стейт для определения вошел пользователь в ситсему или нет
    const [loggedIn, setLoggedIn] = React.useState(false);
-   const handleloggedIn = () => {
-    setLoggedIn(true)
+   function handleloggedIn(data) {
+    setLoggedIn(true);
+    setUserEmail(data.email);
    }
+
+   //сохраняем токен 
+   function tokenCheck() {
+    const jwt = localStorage.getItem('jwt');
+    if (jwt) {
+      auth.getContent(jwt)
+        .then((data) => {
+          handleloggedIn(data);
+          navigate('/my-profile');
+        })
+        .catch((err) => console.log(err));
+    };
+  }
+
+    React.useEffect(()=> {
+      tokenCheck();
+    },[]);
+
+//сабмит формы регистрации
+   function handleSubmitRegister(email, password) {
+    console.log(email);
+    auth.register(email, password)
+    .then((res) => {
+      setSuccses(true);
+      handleRegisterAvatar();
+      navigate('/sign-in', {replace: true});
+      
+  })
+    .catch((err) => {
+      console.log(err);
+      setSuccses(false)})
+   }
+
+   function onOut() {
+    setLoggedIn(false);
+    localStorage.removeItem('jwt');
+   };
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="root">
         <div className="page">
-          <Header />
-          {/*<Main
-            onEditAvatar={handleEditAvatarClick}
-            onEditProfile={handleEditProfileClick}
-            onAddPlace={handleAddPlaceClick}
-            onCardClick={setSelectedCard}
-            hendler={setIsPhotoPopupOpen}
-            onCardLike={handleCardLike}
-            onCardDelete={handleCardDelete}
-            cards={cards}
-  />*/}
-         
+          
           <Routes>
 
             <Route path="/sign-in" element={<Login handleloggedIn={handleloggedIn} />} />
@@ -160,12 +200,14 @@ function App() {
             onCardLike={handleCardLike}
             onCardDelete={handleCardDelete}
             cards={cards}
+            userEmail={userEmail}
+            onOut={onOut}
              />} />
 
-            <Route path="/sign-up" element={<Register />} /> 
+            <Route path="/sign-up" element={<Register onRegister={handleSubmitRegister}/>} /> 
             <Route path="/" element={loggedIn? <Navigate to="/my-profile" /> : <Navigate to="/sign-in" replace/>} />
           </Routes>
-          <Footer />
+          
         </div>
         <EditProfilePopup
           isOpen={isEditProfilePopupOpen}
@@ -193,6 +235,9 @@ function App() {
           isOpen={isPhotoPopupOpen}
           onClose={closeAllPopups}
         />
+
+        //Попап успешной и неуспешной регистрации
+        <InfoTooltip succses={succses} isOpen={isRegisterPopupOpen} onClose={closeAllPopups}/>
       </div>
     </CurrentUserContext.Provider>
   );

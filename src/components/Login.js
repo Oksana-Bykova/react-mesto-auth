@@ -2,6 +2,7 @@ import React from "react";
 import logo from "../images/Vector(2).svg";
 import * as auth from '../utils/auth.js';
 import { Link, useNavigate} from "react-router-dom";
+import Header from "./Header.js";
 
 function Login(props) {
 
@@ -28,10 +29,10 @@ function Login(props) {
     console.log(arr);
     auth.authoize(arr.email, arr.password)
     .then((data) => {
-      console.log(data.token);
+      
       if (data.token){
         localStorage.setItem('jwt', data.token)
-        props.handleloggedIn();
+        props.handleloggedIn(arr);
         navigate('/my-profile')
       }})
       .catch((err) => console.log(err));
@@ -40,38 +41,41 @@ function Login(props) {
   
 
   return(
-    <div className="form__container">
-    <h1 className="form__title">Вход</h1>
-    <form 
-    className="form__form"
-    onSubmit={handleSubmit}> 
-    <input 
-      type="text"
-      className="form__input"
-      name="email"
-      id="email"
-      placeholder="Email"
-      minLength={2}
-      maxLength={30}
-      required=""
-      onChange={handleEmail}
-    />
-    <input
-      type="text"
-      className="form__input"
-      name="password"
-      id="password"
-      placeholder="Пароль"
-      minLength={2}
-      maxLength={30}
-      required=""
-      onChange={handlePassword}
-    />
-    <button type="submit" className="form__button">Войти</button>
-  
-    </form>
+    <>
+      <Header  loggedIn={false} headerMenu="Регистрация" />
+      <div className="form__container">
+      <h1 className="form__title">Вход</h1>
+      <form 
+      className="form__form"
+      onSubmit={handleSubmit}> 
+      <input 
+        type="text"
+        className="form__input"
+        name="email"
+        id="email"
+        placeholder="Email"
+        minLength={2}
+        maxLength={30}
+        required=""
+        onChange={handleEmail}
+      />
+      <input
+        type="text"
+        className="form__input"
+        name="password"
+        id="password"
+        placeholder="Пароль"
+        minLength={2}
+        maxLength={30}
+        required=""
+        onChange={handlePassword}
+      />
+      <button type="submit" className="form__button">Войти</button>
     
-  </div>
+      </form>
+      
+    </div>
+  </>
   )
 }
 
