@@ -11,4 +11,4 @@ JavaScript
 ООП
 ES6 Modules
 
-[Ссылка на проект](https://oksana-bykova.github.io/mesto-react/)
+[Ссылка на проект](https://oksana-bykova.github.io/react-mesto-auth/)

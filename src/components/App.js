@@ -163,7 +163,7 @@ function App() {
 
 //сабмит формы регистрации
    function handleSubmitRegister(email, password) {
-    console.log(email);
+    
     auth.register(email, password)
     .then((res) => {
       setSuccses(true);
@@ -173,13 +173,28 @@ function App() {
   })
     .catch((err) => {
       console.log(err);
-      setSuccses(false)})
+      setSuccses(false)
+      handleRegisterAvatar()})
    }
 
    function onOut() {
     setLoggedIn(false);
     localStorage.removeItem('jwt');
    };
+
+   //сабмит авторизации(ввода логина)
+   function handleSubmitLogin (arr) {
+    auth.authoize(arr.email, arr.password)
+    .then((data) => {
+      
+      if (data.token){
+        localStorage.setItem('jwt', data.token)
+        handleloggedIn(arr);
+        navigate('/my-profile')
+      }})
+      .catch((err) => console.log(err));
+      
+   }
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
@@ -188,7 +203,7 @@ function App() {
           
           <Routes>
 
-            <Route path="/sign-in" element={<Login handleloggedIn={handleloggedIn} />} />
+            <Route path="/sign-in" element={<Login  onLogin={handleSubmitLogin} />} />
 
             <Route path="/my-profile" element={<ProtectedRouteElement element={Main}
              loggedIn={loggedIn}

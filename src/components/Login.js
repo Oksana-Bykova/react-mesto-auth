@@ -1,16 +1,11 @@
 import React from "react";
-import logo from "../images/Vector(2).svg";
-import * as auth from '../utils/auth.js';
-import { Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "./Header.js";
+import { AuthForm } from "./AuthForm";
 
 function Login(props) {
-
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const navigate = useNavigate();
-
-
 
   function handleEmail(evt) {
     setEmail(evt.target.value);
@@ -22,61 +17,27 @@ function Login(props) {
 
   function handleSubmit(evt) {
     evt.preventDefault();
-    const arr ={
+    const arr = {
       email: email,
       password: password,
     };
-    console.log(arr);
-    auth.authoize(arr.email, arr.password)
-    .then((data) => {
-      
-      if (data.token){
-        localStorage.setItem('jwt', data.token)
-        props.handleloggedIn(arr);
-        navigate('/my-profile')
-      }})
-      .catch((err) => console.log(err));
-      
-    }
-  
+    props.onLogin(arr);
+  }
 
-  return(
+  return (
     <>
-      <Header  loggedIn={false} headerMenu="Регистрация" />
-      <div className="form__container">
-      <h1 className="form__title">Вход</h1>
-      <form 
-      className="form__form"
-      onSubmit={handleSubmit}> 
-      <input 
-        type="text"
-        className="form__input"
-        name="email"
-        id="email"
-        placeholder="Email"
-        minLength={2}
-        maxLength={30}
-        required=""
-        onChange={handleEmail}
+      <Header loggedIn={false} headerMenu="Регистрация" />
+      <AuthForm
+        title="Вход"
+        buttonText="Войти"
+        handleSubmit={handleSubmit}
+        handleEmail={handleEmail}
+        handlePassword={handlePassword}
+        valueEmail={email}
+        valuePassword={password}
       />
-      <input
-        type="text"
-        className="form__input"
-        name="password"
-        id="password"
-        placeholder="Пароль"
-        minLength={2}
-        maxLength={30}
-        required=""
-        onChange={handlePassword}
-      />
-      <button type="submit" className="form__button">Войти</button>
-    
-      </form>
-      
-    </div>
-  </>
-  )
+    </>
+  );
 }
 
 export default Login;
